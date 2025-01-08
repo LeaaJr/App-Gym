@@ -8,6 +8,7 @@ import LoginScreen from './screens/LoginScreen';
 import RegisterScreen from './screens/RegisterScreen';
 import GymScreen from './screens/GymScreen'; // Importa GymScreen correctamente
 
+
 const FoodScreen = () => (
   <View style={styles.screenContainer}>
     <Text>Comidas</Text>
