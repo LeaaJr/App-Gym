@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, View, Text } from 'react-native'; // Asegúrate de importar View y Text
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -8,7 +8,7 @@ import LoginScreen from './screens/LoginScreen';
 import RegisterScreen from './screens/RegisterScreen';
 import GymScreen from './screens/GymScreen'; // Importa GymScreen correctamente
 
-
+// Aquí se pueden agregar más pantallas si es necesario
 const FoodScreen = () => (
   <View style={styles.screenContainer}>
     <Text>Comidas</Text>
@@ -56,7 +56,7 @@ const HomeTabs = () => {
     >
       <Tab.Screen
         name="Gym"
-        component={GymScreen} // Usa el componente importado
+        component={GymScreen} // Usa el componente GymScreen para mostrar los ejercicios
         options={{
           tabBarLabel: 'Pesas',
           tabBarIcon: ({ color, size }) => (
@@ -101,6 +101,11 @@ const HomeTabs = () => {
 const styles = StyleSheet.create({
   container: {
     boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.25)', // Reemplaza las propiedades shadow*
+  },
+  screenContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 
