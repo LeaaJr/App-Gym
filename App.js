@@ -1,14 +1,13 @@
-import React from 'react';
-import { StyleSheet, View, Text } from 'react-native'; // Asegúrate de importar View y Text
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, View, Text, Button } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import { Ionicons } from '@expo/vector-icons';
 import LoginScreen from './screens/LoginScreen';
 import RegisterScreen from './screens/RegisterScreen';
-import GymScreen from './screens/GymScreen'; // Importa GymScreen correctamente
+import GymScreen from './screens/GymScreen';
 
-// Aquí se pueden agregar más pantallas si es necesario
 const FoodScreen = () => (
   <View style={styles.screenContainer}>
     <Text>Comidas</Text>
@@ -30,19 +29,19 @@ const IaIntegrated = () => (
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 
-const App = () => {
+// Pantalla para seleccionar el idioma
+const LanguageSelectionScreen = ({ navigation, setLanguage }) => {
   return (
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName="Login">
-        <Stack.Screen name="Login" component={LoginScreen} />
-        <Stack.Screen name="Register" component={RegisterScreen} />
-        <Stack.Screen name="HomeTabs" component={HomeTabs} />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <View style={styles.screenContainer}>
+      <Text style={styles.header}>Elige tu idioma</Text>
+      <Button title="Español" onPress={() => { setLanguage('es'); navigation.navigate('HomeTabs'); }} />
+      <Button title="English" onPress={() => { setLanguage('en'); navigation.navigate('HomeTabs'); }} />
+      <Button title="Português" onPress={() => { setLanguage('pt'); navigation.navigate('HomeTabs'); }} />
+    </View>
   );
 };
 
-const HomeTabs = () => {
+const HomeTabs = ({ translations }) => {
   return (
     <Tab.Navigator
       initialRouteName="Gym"
@@ -56,9 +55,9 @@ const HomeTabs = () => {
     >
       <Tab.Screen
         name="Gym"
-        component={GymScreen} // Usa el componente GymScreen para mostrar los ejercicios
+        component={GymScreen}
         options={{
-          tabBarLabel: 'Pesas',
+          tabBarLabel: translations.gym_tab || 'Gym',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="barbell-outline" size={size} color={color} />
           ),
@@ -68,7 +67,7 @@ const HomeTabs = () => {
         name="Food"
         component={FoodScreen}
         options={{
-          tabBarLabel: 'Comidas',
+          tabBarLabel: translations.food_tab || 'Food',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="restaurant-outline" size={size} color={color} />
           ),
@@ -78,7 +77,7 @@ const HomeTabs = () => {
         name="IA"
         component={IaIntegrated}
         options={{
-          tabBarLabel: 'IA',
+          tabBarLabel: translations.ia_tab || 'AI',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="chatbubbles-outline" size={size} color={color} />
           ),
@@ -88,7 +87,7 @@ const HomeTabs = () => {
         name="User"
         component={UserScreen}
         options={{
-          tabBarLabel: 'Usuario',
+          tabBarLabel: translations.user_tab || 'User',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="person-outline" size={size} color={color} />
           ),
@@ -98,14 +97,47 @@ const HomeTabs = () => {
   );
 };
 
+const App = () => {
+  const [language, setLanguage] = useState('es'); // Idioma por defecto
+  const [translations, setTranslations] = useState({});
+
+  const languageFiles = {
+    es: require('./src/locales/es.json'),
+    en: require('./src/locales/en.json'),
+    pt: require('./src/locales/pt.json'),
+  };
+
+  useEffect(() => {
+    if (languageFiles[language]) {
+      setTranslations(languageFiles[language]);
+    } else {
+      console.error("Idioma no soportado");
+    }
+  }, [language]);
+
+  return (
+    <NavigationContainer>
+      <Stack.Navigator initialRouteName="LanguageSelection">
+        <Stack.Screen name="LanguageSelection">
+          {(props) => <LanguageSelectionScreen {...props} setLanguage={setLanguage} />}
+        </Stack.Screen>
+        <Stack.Screen name="Login" component={LoginScreen} />
+        <Stack.Screen name="Register" component={RegisterScreen} />
+        <Stack.Screen name="HomeTabs" component={() => <HomeTabs translations={translations} />} />
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+};
+
 const styles = StyleSheet.create({
-  container: {
-    boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.25)', // Reemplaza las propiedades shadow*
-  },
   screenContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  header: {
+    fontSize: 24,
+    marginBottom: 20,
   },
 });
 
