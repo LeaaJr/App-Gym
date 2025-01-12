@@ -7,12 +7,8 @@ import { Ionicons } from '@expo/vector-icons';
 import LoginScreen from './screens/LoginScreen';
 import RegisterScreen from './screens/RegisterScreen';
 import GymScreen from './screens/GymScreen';
+import FoodScreen from './screens/FoodScreen';
 
-const FoodScreen = () => (
-  <View style={styles.screenContainer}>
-    <Text>Comidas</Text>
-  </View>
-);
 
 const UserScreen = () => (
   <View style={styles.screenContainer}>
