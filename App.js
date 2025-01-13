@@ -8,7 +8,8 @@ import LoginScreen from './screens/LoginScreen';
 import RegisterScreen from './screens/RegisterScreen';
 import GymScreen from './screens/GymScreen';
 import FoodScreen from './screens/FoodScreen';
-
+import MealPlanScreen from './screens/MealPlanScreen';
+import RecipeDetailScreen from './screens/RecipeDetailScreen';
 
 const UserScreen = () => (
   <View style={styles.screenContainer}>
@@ -24,6 +25,26 @@ const IaIntegrated = () => (
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
+
+// Definir un Stack para la pestaña "Food"
+const FoodStack = createStackNavigator();
+
+const FoodStackScreen = () => {
+  return (
+    <FoodStack.Navigator>
+      <FoodStack.Screen
+        name="FoodHome"
+        component={FoodScreen} // Pantalla principal de comida
+        options={{ title: 'Comidas' }}
+      />
+      <FoodStack.Screen
+        name="MealPlan"
+        component={MealPlanScreen} // Pantalla de plan de comidas
+        options={{ title: 'Plan de Comidas' }}
+      />
+    </FoodStack.Navigator>
+  );
+};
 
 // Pantalla para seleccionar el idioma
 const LanguageSelectionScreen = ({ navigation, setLanguage }) => {
@@ -61,7 +82,7 @@ const HomeTabs = ({ translations }) => {
       />
       <Tab.Screen
         name="Food"
-        component={FoodScreen}
+        component={FoodStackScreen} // Usamos el stack de "Food"
         options={{
           tabBarLabel: translations.food_tab || 'Food',
           tabBarIcon: ({ color, size }) => (
@@ -121,6 +142,9 @@ const App = () => {
         <Stack.Screen name="Register" component={RegisterScreen} />
         <Stack.Screen name="HomeTabs" component={() => <HomeTabs translations={translations} />} />
       </Stack.Navigator>
+
+
+      
     </NavigationContainer>
   );
 };

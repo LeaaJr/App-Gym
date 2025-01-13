@@ -1,70 +1,74 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Button, FlatList, Image, StyleSheet } from 'react-native';
+import { View, Text, FlatList, StyleSheet, Button, Picker } from 'react-native';
+import { fetchRecipesByCalories, generateMealPlan } from '../api/apiService'; // Importa las funciones de la API
+import RecipeCard from '../components/RecipeCard';
+import LoadingSpinner from '../components/LoadingSpinner';
+import { useNavigation } from '@react-navigation/native'; // Importa el hook de navegación
 
-const FoodScreen = () => {
-  const [foodRecommendations, setFoodRecommendations] = useState([]);
+const FoodScreen = ({ navigation }) => {
+  const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [selectedGoal, setSelectedGoal] = useState('definicion'); // Valor por defecto: "definición"
 
-  // Tu clave de API
-  const apiKey = '26e329a7bc4f4ffe89aab4d68d984b9f';
-
-  // Función para obtener recetas por calorías (complexSearch)
-  const getRecipesByCalories = async (calories) => {
-    setLoading(true);
-    try {
-      const response = await fetch(`https://api.spoonacular.com/recipes/complexSearch?maxCalories=${calories}&apiKey=${apiKey}`);
-      const data = await response.json();
-      setFoodRecommendations(data.results);
-    } catch (error) {
-      console.error('Error fetching recipes by calories', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Función para obtener recetas por macronutrientes (findByNutrients)
-  const getRecipesByMacros = async (calories, protein, fat, carbs) => {
-    setLoading(true);
-    try {
-      const response = await fetch(
-        `https://api.spoonacular.com/recipes/findByNutrients?calories=${calories}&protein=${protein}&fat=${fat}&carbs=${carbs}&apiKey=${apiKey}`
-      );
-      const data = await response.json();
-      setFoodRecommendations(data);
-    } catch (error) {
-      console.error('Error fetching recipes by macronutrients', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Función que se ejecuta al cargar la pantalla
   useEffect(() => {
-    // Ejemplo: obtener recetas con un máximo de 600 calorías
-    getRecipesByCalories(600);
-    // O también puedes usar getRecipesByMacros para obtener recetas basadas en macronutrientes
-    // getRecipesByMacros(600, 20, 10, 50); // 600 calorías, 20g proteína, 10g grasa, 50g carbohidratos
+    const getRecipes = async () => {
+      setLoading(true);
+      try {
+        const data = await fetchRecipesByCalories(600); // Límite de 600 calorías
+        setRecipes(data);
+      } catch (error) {
+        console.error('Error loading recipes:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    getRecipes();
   }, []);
 
-  // Renderizar los resultados en una lista
+  const handleGenerateMealPlan = async () => {
+    try {
+      const mealPlan = await generateMealPlan(selectedGoal); // Generar plan de comidas según la meta seleccionada
+      navigation.navigate('MealPlan', { mealPlan }); // Navegar al MealPlanScreen con el plan generado
+    } catch (error) {
+      console.error('Error generating meal plan:', error);
+    }
+  };
+
+  const handleViewRecipe = (recipeId) => {
+    navigation.navigate('RecipeDetail', { recipeId }); // Navegar a la pantalla de detalles de la receta
+  };
+
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Recomendaciones de Comidas</Text>
+      <Text style={styles.title}>Recomendaciones de Comidas</Text>
+      
+      {/* Selector de objetivo: Aumento, Definición o Bajando de Peso */}
+      <Text style={styles.subTitle}>Selecciona tu objetivo</Text>
+      <Picker
+        selectedValue={selectedGoal}
+        style={styles.picker}
+        onValueChange={(itemValue) => setSelectedGoal(itemValue)}
+      >
+        <Picker.Item label="Definición" value="definicion" />
+        <Picker.Item label="Aumento de Masa" value="aumento" />
+        <Picker.Item label="Bajar de Peso" value="bajar" />
+      </Picker>
+
+      {/* Botón para generar plan de comidas */}
+      <Button title="Generar Plan de Comidas" onPress={handleGenerateMealPlan} />
+
       {loading ? (
-        <Text>Cargando...</Text>
+        <LoadingSpinner />
       ) : (
         <FlatList
-          data={foodRecommendations}
+          data={recipes}
           keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => (
-            <View style={styles.recipeCard}>
-              <Image source={{ uri: item.image }} style={styles.recipeImage} />
-              <Text style={styles.recipeTitle}>{item.title}</Text>
-              <Button
-                title="Ver receta"
-                onPress={() => alert(`Ver receta de ${item.title}`)} // Aquí puedes agregar la navegación para mostrar la receta completa
-              />
-            </View>
+            <RecipeCard
+              title={item.title}
+              image={item.image}
+              onPress={() => handleViewRecipe(item.id)} // Al hacer clic, navegará a la receta
+            />
           )}
         />
       )}
@@ -78,26 +82,20 @@ const styles = StyleSheet.create({
     padding: 10,
     backgroundColor: '#fff',
   },
-  header: {
+  title: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,
     textAlign: 'center',
   },
-  recipeCard: {
-    marginBottom: 20,
-    backgroundColor: '#f9f9f9',
-    borderRadius: 10,
-    padding: 10,
-  },
-  recipeImage: {
-    width: '100%',
-    height: 200,
-    borderRadius: 10,
-  },
-  recipeTitle: {
+  subTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
+    marginVertical: 10,
+    textAlign: 'center',
+  },
+  picker: {
+    height: 50,
+    width: '100%',
     marginVertical: 10,
   },
 });
